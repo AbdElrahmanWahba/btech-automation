@@ -1,5 +1,7 @@
 # B.tech — Search & Add-to-Cart Automation
 
+[![Robot Framework Tests](https://github.com/AbdElrahmanWahba/btech-automation/actions/workflows/tests.yml/badge.svg)](https://github.com/AbdElrahmanWahba/btech-automation/actions/workflows/tests.yml)
+
 End-to-end UI test that automates the B.tech storefront (https://btech.com/en):
 
 1. Open the B.tech website
