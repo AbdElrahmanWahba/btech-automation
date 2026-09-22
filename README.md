@@ -16,6 +16,20 @@ while every selector and low-level action lives in the resource file.
 
 ---
 
+## Demo
+
+The clip below is recorded by the test itself (Browser Library / Playwright video),
+showing the full flow running end to end:
+
+<video src="https://github.com/AbdElrahmanWahba/btech-automation/raw/main/docs/demo.webm" controls width="820"></video>
+
+> If the player doesn't load inline (e.g. Safari, which doesn't support `.webm`),
+> [click here to view or download the demo](docs/demo.webm).
+>
+> To regenerate it yourself: `robot -v RECORD:True -v HEADLESS:False tests/btech_purchase_flow.robot`
+
+---
+
 ## Project structure
 
 ```

@@ -28,6 +28,12 @@ ${TIMEOUT}                  45s
 # Pause after every step, so the flow is easy to watch during a demo.
 # Set it to 0s for fast/CI runs, e.g.  -v STEP_PAUSE:0s
 ${STEP_PAUSE}               3s
+# Optional video recording of the run (opt-in, off by default so CI stays fast).
+# Enable with:  -v RECORD:True   -> a .webm is saved under results/video/
+# NOTE: forward slashes on purpose — the path is embedded in a dict literal, and
+# Windows backslashes would be read as escape sequences there.
+${RECORD}                   ${False}
+${VIDEO_DIR}                results/video
 
 # --- Locators ----------------------------------------------------------------
 # We prefer stable, semantic attributes that the B.tech developers put there on
@@ -69,7 +75,15 @@ Open B.tech Website
     ...                Headless mode is controlled by the ${HEADLESS} variable.
     New Browser    ${BROWSER}    headless=${HEADLESS}
     # A realistic desktop viewport so the desktop layout (and its locators) load.
-    New Context    viewport={'width': 1366, 'height': 900}
+    # When RECORD is enabled, Playwright records a .webm of the whole session;
+    # otherwise we open a plain context (no recording overhead).
+    IF    ${RECORD}
+        New Context
+        ...    viewport={'width': 1366, 'height': 900}
+        ...    recordVideo={'dir': '${VIDEO_DIR}', 'size': {'width': 1366, 'height': 900}}
+    ELSE
+        New Context    viewport={'width': 1366, 'height': 900}
+    END
     # Apply our default wait to every action BEFORE we navigate.
     Set Browser Timeout    ${TIMEOUT}
     # Open a blank page first, then navigate waiting only for the DOM to be
