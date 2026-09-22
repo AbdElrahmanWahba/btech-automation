@@ -1,0 +1,17 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Robot Framework run artifacts
+results/
+log.html
+report.html
+output.xml
+
+# Playwright / Browser Library local state
+browser/
+
+# IDE / editor project files
+.idea/
+.vscode/

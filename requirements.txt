@@ -1,0 +1,6 @@
+# Robot Framework core engine
+robotframework==7.2.2
+
+# Browser Library (Playwright-based) — modern, fast, auto-waiting web automation.
+# After installing, you must run:  rfbrowser init   (downloads the Playwright browsers)
+robotframework-browser==19.5.1
