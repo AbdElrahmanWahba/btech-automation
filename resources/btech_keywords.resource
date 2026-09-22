@@ -57,6 +57,10 @@ ${FIRST_CARD_DECREASE}      ${FIRST_CARD} >> button[aria-label="Decrease quantit
 ${CART_TRIGGER}             [data-testid="cart-trigger"]
 ${CART_DRAWER}              [data-testid="cart-drawer"]
 ${CART_DRAWER_ITEM}         [data-testid="cart-drawer-item"]
+# The numeric badge (a <span>) on the header cart icon. Unlike the on-card
+# stepper (which updates optimistically), this badge reflects the REAL cart
+# state, so it only shows a count once the backend has registered the item.
+${CART_BADGE}               ${CART_TRIGGER} >> css=span
 
 
 *** Keywords ***
@@ -157,10 +161,16 @@ Add First Result To Cart
     ...                the product to the cart (quantity 0 -> 1).
     Wait For Elements State    ${FIRST_CARD_ADD}    visible
     Click    ${FIRST_CARD_ADD}
-    # Confirm the add worked before moving on: the card must switch to the
-    # quantity stepper, i.e. its "Decrease quantity" button becomes visible.
+    # First proof (fast, optimistic): the card switches to the quantity stepper,
+    # i.e. its "Decrease quantity" button becomes visible.
     Wait For Elements State    ${FIRST_CARD_DECREASE}    visible    timeout=${TIMEOUT}
-    Log    First result added to cart (quantity stepper is now shown).
+    # Second proof (authoritative): the header cart badge shows a real count.
+    # The on-card stepper appears instantly (optimistic UI), but the cart is
+    # only truly updated once the backend responds — which can lag on slower
+    # networks / CI. Waiting for the badge here removes that race before we
+    # open the cart, so the drawer is never read while still empty.
+    Wait For Elements State    ${CART_BADGE}    visible    timeout=${TIMEOUT}
+    Log    First result added to cart (cart badge now shows a count).
     Sleep    ${STEP_PAUSE}    reason=Pause so the step is easy to watch.
 
 Navigate To Cart
@@ -168,6 +178,14 @@ Navigate To Cart
     ...                verifies it is open and contains at least one line item.
     Click    ${CART_TRIGGER}
     Wait For Elements State    ${CART_DRAWER}    visible    timeout=${TIMEOUT}
+    # Poll for a stable, non-empty item list. This guards against the brief
+    # render flicker that can occur on slower networks, where the drawer paints
+    # a moment before its line items are populated.
+    Wait Until Keyword Succeeds    5x    1s    Cart Drawer Has At Least One Item
+
+Cart Drawer Has At Least One Item
+    [Documentation]    Helper: asserts the open cart drawer holds >= 1 line item.
+    ...                Retried by the caller so a transient empty read is tolerated.
     Wait For Elements State    ${CART_DRAWER_ITEM}    visible
     ${items}=    Get Element Count    ${CART_DRAWER_ITEM}
     Should Be True    ${items} > 0    The cart drawer opened but is empty.
